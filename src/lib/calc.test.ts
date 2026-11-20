@@ -51,7 +51,7 @@ describe('porciones', () => {
       expect(f.servings.length, f.id).toBeGreaterThan(0);
       for (const v of [f.kcal, f.p, f.c, f.f, f.fiber]) expect(Number.isFinite(v) && v >= 0, f.id).toBe(true);
       // Coherencia aproximada de energía (salvo alcohol y verduras muy bajas en kcal)
-      if (f.kcal > 60 && f.fiber < 20 && !/cerveza|ron$|whisky|vino|cuba|sangr|mojito|colada|vodka|tequila|anís|gin|ponche/i.test(f.name)) {
+      if (f.kcal > 60 && f.fiber < 20 && !/cerveza|ron$|whisky|vino|cuba|sangr|mojito|colada|vodka|tequila|anís|gin|ponche|vermut|tinto de verano|clara \(|caña/i.test(f.name)) {
         expect(Math.abs(f.kcal - (4 * f.p + 4 * (f.c - f.fiber) + 2 * f.fiber + 9 * f.f)) / f.kcal, f.id).toBeLessThan(0.25);
       }
     }
@@ -61,6 +61,15 @@ describe('porciones', () => {
     expect(searchFoods(SEED_FOODS, 'cambur')[0].name).toMatch(/Cambur/);
     expect(searchFoods(SEED_FOODS, 'tequeño').length).toBeGreaterThan(1);
     expect(searchFoods(SEED_FOODS, 'pabellon').length).toBeGreaterThan(2);
+  });
+  it('búsqueda con nombres de España y sinónimos', () => {
+    expect(searchFoods(SEED_FOODS, 'tortilla de patatas')[0].name).toBe('Tortilla de patatas');
+    expect(searchFoods(SEED_FOODS, 'paella').length).toBeGreaterThan(1);
+    expect(searchFoods(SEED_FOODS, 'zumo naranja').length).toBeGreaterThan(1); // encuentra también los jugos
+    expect(searchFoods(SEED_FOODS, 'patatas fritas').some((f) => /Papas fritas/.test(f.name))).toBe(true);
+    expect(searchFoods(SEED_FOODS, 'gambas').some((f) => /Camarones/.test(f.name))).toBe(true);
+    expect(searchFoods(SEED_FOODS, 'platano')[0].name).toMatch(/Plátano/);
+    expect(SEED_FOODS.length).toBeGreaterThan(1070);
   });
 });
 

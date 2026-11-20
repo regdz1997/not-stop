@@ -65,3 +65,69 @@ export function LineChart({ points, trend, goal, height = 180, unit = '' }: { po
     </svg>
   );
 }
+
+const DAY = 86400000;
+/** Historial de peso + curva proyectada hasta la meta, en una escala de tiempo real. */
+export function ProjectionChart({ history, projection, goal, today, unit, endLabel }: {
+  history: { date: string; kg: number; trend: number }[];
+  projection: { date: string; kg: number }[];
+  goal: number;
+  today: string;
+  unit: string;
+  endLabel?: string;
+}) {
+  const W2 = 340, H = 210;
+  const pad = { l: 34, r: 12, t: 18, b: 24 };
+  const all = [...history.map((h) => h.date), ...projection.map((p) => p.date), today];
+  const t0 = Math.min(...all.map((d) => Date.parse(d)));
+  const t1 = Math.max(...all.map((d) => Date.parse(d)), t0 + 14 * DAY);
+  const vals = [...history.flatMap((h) => [h.kg, h.trend]), ...projection.map((p) => p.kg), goal];
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (hi - lo < 2) { lo -= 1; hi += 1; }
+  const sp = hi - lo; lo -= sp * 0.08; hi += sp * 0.1;
+  const x = (d: string) => pad.l + ((Date.parse(d) - t0) / (t1 - t0)) * (W2 - pad.l - pad.r);
+  const y = (v: number) => pad.t + (H - pad.t - pad.b) * (1 - (v - lo) / (hi - lo));
+  const path = (pts: { d: string; v: number }[]) => pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.d).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ');
+  const ticks = [lo + (hi - lo) * 0.2, lo + (hi - lo) * 0.55, lo + (hi - lo) * 0.9];
+  const fmt = (d: string) => new Date(Date.parse(d)).toLocaleDateString('es', { day: 'numeric', month: 'short' });
+  const end = projection[projection.length - 1];
+  const histPath = path(history.map((h) => ({ d: h.date, v: h.trend })));
+  const projPath = projection.length > 1 ? path(projection.map((p) => ({ d: p.date, v: p.kg }))) : '';
+  const area = projection.length > 1 ? `${projPath} L${x(end.date).toFixed(1)},${(H - pad.b).toFixed(1)} L${x(projection[0].date).toFixed(1)},${(H - pad.b).toFixed(1)} Z` : '';
+  return (
+    <svg className="chart" viewBox={`0 0 ${W2} ${H}`} role="img" aria-label="Proyección de peso">
+      <defs>
+        <linearGradient id="projFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#7a6bff" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="#7a6bff" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="histLine" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#4d8dff" />
+          <stop offset="100%" stopColor="#7a6bff" />
+        </linearGradient>
+      </defs>
+      {ticks.map((t, i) => (
+        <g key={i}>
+          <line x1={pad.l} x2={W2 - pad.r} y1={y(t)} y2={y(t)} stroke="rgba(255,255,255,0.06)" />
+          <text x={pad.l - 6} y={y(t) + 3} textAnchor="end">{fmtNum(t, 1)}</text>
+        </g>
+      ))}
+      <line x1={pad.l} x2={W2 - pad.r} y1={y(goal)} y2={y(goal)} stroke="var(--ok)" strokeDasharray="4 5" strokeWidth={1.3} />
+      <text x={pad.l + 4} y={y(goal) - 5} style={{ fill: 'var(--ok)', fontWeight: 700 }}>Meta {fmtNum(goal, 1)} {unit}</text>
+      {area && <path d={area} fill="url(#projFill)" />}
+      {projPath && <path d={projPath} fill="none" stroke="#9c8cff" strokeWidth={2.5} strokeDasharray="2 6" strokeLinecap="round" />}
+      {history.map((h, i) => <circle key={i} cx={x(h.date)} cy={y(h.kg)} r={history.length > 40 ? 1.6 : 2.6} fill="rgba(255,255,255,0.35)" />)}
+      {history.length > 1 && <path d={histPath} fill="none" stroke="url(#histLine)" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />}
+      <line x1={x(today)} x2={x(today)} y1={pad.t - 6} y2={H - pad.b} stroke="rgba(255,255,255,0.18)" strokeDasharray="2 3" />
+      <text x={x(today)} y={pad.t - 8} textAnchor="middle" style={{ fill: 'var(--text)', fontWeight: 700 }}>Hoy</text>
+      {end && projection.length > 1 && (
+        <g>
+          <circle cx={x(end.date)} cy={y(end.kg)} r={6} fill="#0c0d10" stroke="var(--ok)" strokeWidth={3} />
+          {endLabel && <text x={Math.min(x(end.date), W2 - pad.r)} y={y(end.kg) + 18} textAnchor="end" style={{ fill: 'var(--ok)', fontWeight: 700 }}>{endLabel}</text>}
+        </g>
+      )}
+      <text x={pad.l} y={H - 6} textAnchor="start">{fmt(new Date(t0).toISOString().slice(0, 10))}</text>
+      {!(end && projection.length > 1 && endLabel) && <text x={W2 - pad.r} y={H - 6} textAnchor="end">{fmt(new Date(t1).toISOString().slice(0, 10))}</text>}
+    </svg>
+  );
+}

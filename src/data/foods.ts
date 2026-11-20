@@ -23,6 +23,7 @@ export interface Food {
 import { VE_ROWS, type Row } from './foods-ve';
 import { GENERIC_ROWS } from './foods-generic';
 import { EXTRA_ROWS, JUICES, MORE_ROWS } from './foods-extra';
+import { ES_ROWS, SYNONYMS } from './foods-es';
 
 const ROWS: Row[] = [
   // Comida latinoamericana
@@ -201,7 +202,7 @@ function generated(): Row[] {
 /** Todas las filas, sin ids repetidos (gana la primera aparición). */
 export const ALL_ROWS: Row[] = (() => {
   const seen = new Set<string>();
-  return [...ROWS, ...VE_ROWS, ...GENERIC_ROWS, ...EXTRA_ROWS, ...MORE_ROWS, ...generated()].filter((r) => (seen.has(r[0]) ? false : (seen.add(r[0]), true)));
+  return [...ROWS, ...VE_ROWS, ...ES_ROWS, ...GENERIC_ROWS, ...EXTRA_ROWS, ...MORE_ROWS, ...generated()].filter((r) => (seen.has(r[0]) ? false : (seen.add(r[0]), true)));
 })();
 
 export const SEED_FOODS: Food[] = ALL_ROWS.map(([id, name, cat, kcal, p, c, f, fiber, serv]) => ({
@@ -216,7 +217,7 @@ export const SEED_FOODS: Food[] = ALL_ROWS.map(([id, name, cat, kcal, p, c, f, f
   servings: parseServings(serv),
 }));
 
-export const FOOD_CATS = ['Venezolana', 'Latina', 'Proteínas', 'Pescados', 'Lácteos', 'Cereales', 'Panadería', 'Legumbres', 'Frutas', 'Verduras', 'Frutos secos', 'Grasas', 'Bebidas', 'Dulces', 'Comida rápida', 'Snacks', 'Salsas', 'Suplementos', 'Otros'];
+export const FOOD_CATS = ['Venezolana', 'Española', 'Latina', 'Proteínas', 'Pescados', 'Lácteos', 'Cereales', 'Panadería', 'Legumbres', 'Frutas', 'Verduras', 'Frutos secos', 'Grasas', 'Bebidas', 'Dulces', 'Comida rápida', 'Snacks', 'Salsas', 'Suplementos', 'Otros'];
 
 export function normalize(s: string): string {
   return s
@@ -241,11 +242,19 @@ export function searchFoods(foods: Food[], q: string): Food[] {
   const scored: { f: Food; s: number }[] = [];
   for (const f of foods) {
     const n = normalize(f.name + ' ' + (f.brand ?? ''));
-    if (!words.every((w) => n.includes(w))) continue;
+    let viaSynonym = false;
+    const ok = words.every((w) => {
+      if (n.includes(w)) return true;
+      const alts = SYNONYMS[w] ?? SYNONYMS[w.replace(/s$/, '')] ?? [];
+      if (alts.some((a) => n.includes(normalize(a)))) return (viaSynonym = true);
+      return false;
+    });
+    if (!ok) continue;
     const name = normalize(f.name);
     let s = name === qn ? 0 : name.startsWith(qn) ? 10 : name.split(/[\s(/,]+/).some((t) => t.startsWith(words[0])) ? 20 : 30;
     if (POPULAR.has(f.id)) s -= 8;
     if (f.custom) s -= 3; // lo que el usuario creó o usó
+    if (viaSynonym) s += 4; // primero lo que coincide literalmente
     s += Math.min(8, name.length / 8);
     scored.push({ f, s });
   }

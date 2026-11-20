@@ -3,6 +3,7 @@ import { normalize, type Food } from './foods';
 // Emoji y color de burbuja por categoría (tono suave sobre fondo oscuro).
 export const CAT_STYLE: Record<string, { emoji: string; hue: string }> = {
   Venezolana: { emoji: '🫓', hue: '#F2B34A' },
+  Española: { emoji: '🥘', hue: '#E8504A' },
   Latina: { emoji: '🌮', hue: '#F28C4A' },
   Proteínas: { emoji: '🍗', hue: '#FF6B7D' },
   Pescados: { emoji: '🐟', hue: '#4FB6FF' },
@@ -26,7 +27,7 @@ export const CAT_STYLE: Record<string, { emoji: string; hue: string }> = {
 
 // Palabra clave → emoji (la primera coincidencia gana; orden de más específico a más general).
 const KEYS: [string, string][] = [
-  ['tequeno', '🧀'], ['cachapa', '🫓'], ['arepa', '🫓'], ['empanada', '🥟'], ['pastelito', '🥟'], ['hallaca', '🫔'], ['tamal', '🫔'], ['bollo', '🫔'],
+  ['tequeno', '🧀'], ['paella', '🥘'], ['fideua', '🥘'], ['gazpacho', '🍅'], ['salmorejo', '🍅'], ['churro', '🥨'], ['porras', '🥨'], ['croqueta', '🧆'], ['jamon iberico', '🍖'], ['jamon serrano', '🍖'], ['pulpo', '🐙'], ['gamba', '🦐'], ['patata', '🥔'], ['zumo', '🧃'], ['melocoton', '🍑'], ['turron', '🍬'], ['canas', '🍺'], ['cana de', '🍺'], ['horchata', '🥛'], ['cachapa', '🫓'], ['arepa', '🫓'], ['empanada', '🥟'], ['pastelito', '🥟'], ['hallaca', '🫔'], ['tamal', '🫔'], ['bollo', '🫔'],
   ['pizza', '🍕'], ['hamburguesa', '🍔'], ['perro caliente', '🌭'], ['salchicha', '🌭'], ['taco', '🌮'], ['burrito', '🌯'], ['wrap', '🌯'], ['sushi', '🍣'], ['ramen', '🍜'],
   ['sandwich', '🥪'], ['sándwich', '🥪'], ['pepito', '🥖'], ['papas fritas', '🍟'], ['papitas', '🍟'], ['salchipapa', '🍟'], ['cotufa', '🍿'],
   ['sopa', '🍲'], ['sancocho', '🍲'], ['hervido', '🍲'], ['mondongo', '🍲'], ['crema de', '🥣'], ['caldo', '🍲'], ['pisca', '🍲'], ['chupe', '🍲'],

@@ -186,6 +186,7 @@ export const SECTION_OF: Record<string, string> = {
   Bebidas: 'Bebidas',
   Latina: 'Preparados y típicos',
   Venezolana: 'Preparados y típicos',
+  Española: 'Preparados y típicos',
   Pescados: 'Carnes, pescados y proteínas',
   Panadería: 'Granos, panadería y tubérculos',
   Legumbres: 'Granos, panadería y tubérculos',
