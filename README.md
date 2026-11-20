@@ -12,9 +12,16 @@ npm test         # pruebas de lógica y de copia de seguridad
 npm run build    # genera dist/ listo para publicar
 ```
 
+## Publicar una nueva versión
+```bash
+./publicar.sh
+```
+Ejecuta las pruebas, compila y sube la app a GitHub Pages (rama `gh-pages`).
+Enlace: https://regdz1997.github.io/not-stop/
+
 ## Instalar en el iPhone
-1. Publica `dist/` en un hosting con HTTPS (Netlify Drop, Vercel o GitHub Pages).
-2. Abre la URL en **Safari** → botón Compartir → **Agregar a pantalla de inicio**.
+1. Abre https://regdz1997.github.io/not-stop/ en **Safari**.
+2. Botón Compartir → **Agregar a pantalla de inicio**.
 3. Ábrela desde el ícono: va a pantalla completa y funciona sin conexión.
 
 Haz copias de seguridad desde Perfil → «Crear copia de seguridad».
